@@ -91,6 +91,21 @@ jobs:
         with:
           lfs: true
 
+      - name: Expand Docker storage to /mnt/docker
+        shell: bash
+        run: |
+          echo "=== Expanding Docker space using /mnt/docker ==="
+          sudo systemctl stop docker.socket || true
+          sudo systemctl stop docker || true
+          sudo rm -rf /var/lib/docker
+          sudo mkdir -p /mnt/docker
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl daemon-reload
+          sudo systemctl start docker
+          echo "Docker root dir:"
+          docker info | grep "Docker Root Dir"
+          echo "Current disk usage:"
+          df -h
       # Cache Unity Library
       - name: Cache Library
         uses: actions/cache@v3
