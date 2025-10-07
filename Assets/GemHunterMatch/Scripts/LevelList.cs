@@ -32,14 +32,6 @@ namespace Match3
             }
         }
 
-        public SceneAsset GetScene(int levelNumber)
-        {
-#if UNITY_EDITOR
-            return Scenes[levelNumber];
-#else
-            return SceneList[levelNumber];
-#endif
-        }
 
         public void LoadLevel(int levelNumber)
         {
