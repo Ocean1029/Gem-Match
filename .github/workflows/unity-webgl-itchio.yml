@@ -6,7 +6,8 @@ on:
   pull_request:
 
 jobs:
-  free-disk-space:
+  
+  expand-space:
     runs-on: ubuntu-latest
     steps:
 
@@ -20,6 +21,35 @@ jobs:
         large-packages: true
         docker-images: true
         swap-storage: true
+    - name: Expand Docker space dynamically
+      shell: bash
+      run: |
+        echo "=== Detecting system memory ==="
+        TOTAL_MEM_GB=$(free -g | awk '/^Mem:/{print $2}')
+        echo "Detected ${TOTAL_MEM_GB} GB of RAM."
+    
+        if [ "$TOTAL_MEM_GB" -ge 14 ]; then
+          TMPFS_SIZE="30G"
+        elif [ "$TOTAL_MEM_GB" -ge 7 ]; then
+          TMPFS_SIZE="25G"
+        else
+          TMPFS_SIZE="15G"
+        fi
+    
+        echo "Using tmpfs size: $TMPFS_SIZE"
+    
+        echo "=== Expanding Docker space ==="
+        sudo service docker stop
+        sudo rm -rf /var/lib/docker
+        sudo mkdir -p /mnt/docker
+        sudo mount -t tmpfs -o size=$TMPFS_SIZE tmpfs /mnt/docker
+        sudo ln -s /mnt/docker /var/lib/docker
+        sudo service docker start
+    
+        echo "=== Checking space usage ==="
+        df -h
+        docker system df || true
+  
   # test:
   #   name: Run Unity Tests 
   #   runs-on: ubuntu-latest
@@ -52,7 +82,7 @@ jobs:
   build:
     name: Build WebGL ✨
     runs-on: ubuntu-latest
-    needs: free-disk-space
+    needs: expand-space
     # needs: test we don't put dependency since it may run out of container space when we execute jobs sequently. remove the dependency will let them execute in parallel, and they will control their own container.   
     steps:
       # Checkout
