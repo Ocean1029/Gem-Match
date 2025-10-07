@@ -38,7 +38,7 @@ jobs:
   build:
     name: Build WebGL ✨
     runs-on: ubuntu-latest
-    needs: test   
+    # needs: test we don't put dependency since it may run out of container space when we execute jobs sequently. remove the dependency will let them execute in parallel, and they will control their own container.   
     steps:
       # Checkout
       - name: Checkout repository
