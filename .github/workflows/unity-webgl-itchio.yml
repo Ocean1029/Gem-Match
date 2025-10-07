@@ -127,6 +127,12 @@ jobs:
           allowDirtyBuild: true
           customImage: unityci/editor:ubuntu-6000.2.2f1-webgl-3
 
+      - name: Display Editor log if build failed
+        if: failure()
+        run: |
+          echo "=== BUILD FAILED: Showing last 100 lines of Editor.log ==="
+          tail -n 100 unity-editor.log || echo "No Editor log found"
+  
       # Upload artifact (for verification or manual download)
       - name: Upload WebGL artifact
         uses: actions/upload-artifact@v4
