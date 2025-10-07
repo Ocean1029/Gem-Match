@@ -80,7 +80,7 @@ jobs:
         with:
           targetPlatform: WebGL
           allowDirtyBuild: true
-          customImage: unityci/editor:ubuntu-6000.2.2f1-webgl-1
+          customImage: unityci/editor:ubuntu-6000.2.2f1-webgl-3
 
       # Upload artifact (for verification or manual download)
       - name: Upload WebGL artifact
