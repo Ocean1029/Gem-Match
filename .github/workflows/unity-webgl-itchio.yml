@@ -50,40 +50,38 @@ jobs:
         df -h
         docker system df || true
   
-  # test:
-  #   name: Run Unity Tests 
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # Checkout repo
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         lfs: true
+  Run-Unity-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
 
-  #     # Cache Unity Library
-  #     - name: Cache Library
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: Library
-  #         key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-  #         restore-keys: |
-  #           Library-
+      # Cache Unity Library
+      - name: Cache Library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
 
-  #     # Run Unity tests
-  #     - name: Run tests
-  #       uses: game-ci/unity-test-runner@v4
-  #       env:
-  #         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  #         UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-  #         UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-  #       with:
-  #         githubToken: ${{ secrets.GITHUB_TOKEN }}
+      # Run Unity tests
+      - name: Run tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Build WebGL ✨
     runs-on: ubuntu-latest
     needs: expand-space
-    # needs: test we don't put dependency since it may run out of container space when we execute jobs sequently. remove the dependency will let them execute in parallel, and they will control their own container.   
     steps:
       # Checkout
       - name: Checkout repository
@@ -91,21 +89,21 @@ jobs:
         with:
           lfs: true
 
-      - name: Expand Docker storage to /mnt/docker
-        shell: bash
-        run: |
-          echo "=== Expanding Docker space using /mnt/docker ==="
-          sudo systemctl stop docker.socket || true
-          sudo systemctl stop docker || true
-          sudo rm -rf /var/lib/docker
-          sudo mkdir -p /mnt/docker
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl daemon-reload
-          sudo systemctl start docker
-          echo "Docker root dir:"
-          docker info | grep "Docker Root Dir"
-          echo "Current disk usage:"
-          df -h
+      # - name: Expand Docker storage to /mnt/docker
+      #   shell: bash
+      #   run: |
+      #     echo "=== Expanding Docker space using /mnt/docker ==="
+      #     sudo systemctl stop docker.socket || true
+      #     sudo systemctl stop docker || true
+      #     sudo rm -rf /var/lib/docker
+      #     sudo mkdir -p /mnt/docker
+      #     echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+      #     sudo systemctl daemon-reload
+      #     sudo systemctl start docker
+      #     echo "Docker root dir:"
+      #     docker info | grep "Docker Root Dir"
+      #     echo "Current disk usage:"
+      #     df -h
       # Cache Unity Library
       - name: Cache Library
         uses: actions/cache@v3
