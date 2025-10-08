@@ -34,7 +34,14 @@ namespace Match3
                 cell.ContainingGem.Use(null);
             }
             else if (cell.ContainingGem.CurrentMatch == null && !cell.ContainingGem.Damage(1))
-                receivingMatch.AddGem(cell.ContainingGem);
+            {
+                // Check if gem still exists in cell after Damage() 
+                // (some gems like Enemy clean themselves up in their Damage() method)
+                if (cell.ContainingGem != null)
+                {
+                    receivingMatch.AddGem(cell.ContainingGem);
+                }
+            }
         }
 
         //effect on the board are triggered by the gems being destroyed, but when using a bonus item ot use a Bonus Gem

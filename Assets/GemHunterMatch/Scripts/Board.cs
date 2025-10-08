@@ -31,6 +31,9 @@ namespace Match3
 
         public List<Vector3Int> SpawnerPosition = new();
         public Dictionary<Vector3Int, BoardCell> CellContent = new();
+        
+        // Enemy tracking system
+        private List<Enemy> m_Enemies = new();
 
         public Gem[] ExistingGems;
 
@@ -237,6 +240,33 @@ namespace Match3
             obstacle.transform.position = s_Instance.m_Grid.GetCellCenterWorld(cell);
             s_Instance.CellContent[cell].Obstacle = obstacle;
         }
+        
+        /// <summary>
+        /// Register an enemy to the board's tracking system
+        /// </summary>
+        public static void RegisterEnemy(Enemy enemy)
+        {
+            if (s_Instance == null)
+            {
+                s_Instance = GameObject.Find("Grid").GetComponent<Board>();
+            }
+            
+            if (!s_Instance.m_Enemies.Contains(enemy))
+            {
+                s_Instance.m_Enemies.Add(enemy);
+            }
+        }
+        
+        /// <summary>
+        /// Unregister an enemy from the board's tracking system
+        /// </summary>
+        public static void UnregisterEnemy(Enemy enemy)
+        {
+            if (s_Instance != null && s_Instance.m_Enemies.Contains(enemy))
+            {
+                s_Instance.m_Enemies.Remove(enemy);
+            }
+        }
 
         public static void ChangeLock(Vector3Int cellPosition, bool lockState)
         {
@@ -304,6 +334,35 @@ namespace Match3
             }
 
             s_Instance.SpawnerPosition.Add(cell);
+        }
+        
+        /// <summary>
+        /// Notify all enemies that the player has made a move
+        /// </summary>
+        private void NotifyEnemiesOfPlayerMove()
+        {
+            // Create a copy of the list to avoid modification during iteration
+            var enemiesCopy = new List<Enemy>(m_Enemies);
+            
+            foreach (var enemy in enemiesCopy)
+            {
+                if (enemy != null)
+                {
+                    enemy.OnPlayerMove();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Mark a cell as empty so it can be refilled by the Board
+        /// </summary>
+        public static void MarkCellAsEmpty(Vector3Int cell)
+        {
+            if (s_Instance != null && !s_Instance.m_EmptyCells.Contains(cell))
+            {
+                s_Instance.m_EmptyCells.Add(cell);
+                Debug.Log($"[Board] Cell {cell} marked as empty for refilling");
+            }
         }
 
         //generate a gem in every cell, making sure we don't have any match 
@@ -495,6 +554,11 @@ namespace Match3
             //only increment when the board is still and nothing happens
             //the starting value is if we have a bonus item or not (if we have one, this cannot increment)
             bool incrementHintTimer = m_ActivatedBonus == null;
+            
+            if (m_FinalStretch && !incrementHintTimer)
+            {
+                Debug.Log($"[Board] incrementHintTimer is FALSE because m_ActivatedBonus = {m_ActivatedBonus}");
+            }
 
             if (m_TickingCells.Count > 0)
             {
@@ -553,9 +617,15 @@ namespace Match3
 
             if (m_NewTickingCells.Count > 0)
             {
+                int newTickingCount = m_NewTickingCells.Count;
                 m_TickingCells.AddRange(m_NewTickingCells);
                 m_NewTickingCells.Clear();
                 incrementHintTimer = false;
+                
+                if (m_FinalStretch)
+                {
+                    Debug.Log($"[Board] incrementHintTimer set to FALSE by NewTickingCells (count: {newTickingCount})");
+                }
             }
             
             if (incrementHintTimer)
@@ -563,11 +633,21 @@ namespace Match3
                 //nothing can happen anymore, if we were in the last stretch trigger the end
                 if (m_FinalStretch)
                 {
+                    Debug.Log("[Board] Final stretch triggered - showing end screen!");
                     //this stop the end to be called in a loop. Input is still disabled to user cannot interact with board
                     m_FinalStretch = false;
                     UIHandler.Instance.ShowEnd();
                     return;
                 }
+            }
+            else if (m_FinalStretch)
+            {
+                // Debug: Board is not stable yet, list what's blocking
+                Debug.Log($"[Board] Final stretch waiting for board to settle. BoardActions: {m_BoardActions.Count}, TickingCells: {m_TickingCells.Count}, TickingMatch: {m_TickingMatch.Count}, EmptyCells: {m_EmptyCells.Count}, SwapStage: {m_SwapStage}, SwipeQueued: {m_SwipeQueued}, ActivatedBonus: {m_ActivatedBonus}, incrementHintTimer: {incrementHintTimer}");
+            }
+            
+            if (incrementHintTimer)
+            {
                 
                 //Nothing happened this frame, but the board was changed since last possible match check, so need to refresh
                 if (m_BoardChanged)
@@ -887,7 +967,14 @@ namespace Match3
 
         public void DestroyGem(Vector3Int cell, bool forcedDeletion = false)
         {
-            if(CellContent[cell].ContainingGem?.CurrentMatch != null)
+            // Check if the cell exists and has a gem
+            if (!CellContent.ContainsKey(cell) || CellContent[cell].ContainingGem == null)
+            {
+                Debug.LogWarning($"[Board] DestroyGem called on cell {cell} but no gem found (gem may have already been destroyed)");
+                return;
+            }
+            
+            if(CellContent[cell].ContainingGem.CurrentMatch != null)
                 return;
 
             var match = new Match()
@@ -1136,6 +1223,9 @@ namespace Match3
 
                         // as swap was successful, we count down 1 move from the level
                         LevelData.Instance.Moved();
+                        
+                        // Notify all enemies that a player move has occurred
+                        NotifyEnemiesOfPlayerMove();
                     }
                     else
                     {

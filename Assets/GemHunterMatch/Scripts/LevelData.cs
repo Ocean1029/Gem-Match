@@ -18,11 +18,21 @@ namespace Match3
             public Gem Gem;
             public int Count;
         }
+        
+        [Serializable]
+        public class EnemyGoal
+        {
+            public int Count; // Number of enemies to defeat
+            public Enemy EnemyPrefab; // Reference to enemy prefab (will use its sprite for UI)
+            public Sprite UISprite; // Optional: Override sprite for UI (if null, uses EnemyPrefab's sprite)
+            public int GemType = -1; // Gem type ID for enemy (use -1 to avoid conflicts with regular gems)
+        }
 
         public string LevelName = "Level";
         public int MaxMove;
         public int LowMoveTrigger = 10;
         public GemGoal[] Goals;
+        public EnemyGoal EnemyGoals; // Enemy defeat objective
         
         [Header("Visuals")]
         public float BorderMargin = 0.3f;
@@ -51,6 +61,18 @@ namespace Match3
             Instance = this;
             RemainingMove = MaxMove;
             GoalLeft = Goals.Length;
+            
+            Debug.Log($"[LevelData] Awake - Initial GoalLeft from Goals: {GoalLeft}");
+            
+            // Add enemy goals to total goal count if they exist
+            if (EnemyGoals != null && EnemyGoals.Count > 0)
+            {
+                GoalLeft += 1; // Enemy goal counts as one overall goal
+                Debug.Log($"[LevelData] Awake - Enemy goal added, new GoalLeft: {GoalLeft}");
+            }
+            
+            Debug.Log($"[LevelData] Awake - Final GoalLeft: {GoalLeft}");
+            
             GameManager.Instance.StartLevel();
         }
 
@@ -90,8 +112,11 @@ namespace Match3
                     if (goal.Count == 0)
                     {
                         GoalLeft -= 1;
+                        Debug.Log($"[LevelData] Gem goal {gem.GemType} completed! GoalLeft is now: {GoalLeft}");
+                        
                         if (GoalLeft == 0)
                         {
+                            Debug.Log("[LevelData] ALL GOALS COMPLETED! Triggering victory!");
                             GameManager.Instance.WinStar();
                             GameManager.Instance.Board.ToggleInput(false);
                             OnAllGoalFinished?.Invoke();
@@ -129,6 +154,41 @@ namespace Match3
             if (RemainingMove <= 0)
             {
                 OnNoMoveLeft();
+            }
+        }
+        
+        /// <summary>
+        /// Called when an enemy is defeated
+        /// </summary>
+        public void EnemyDefeated()
+        {
+            if (EnemyGoals == null || EnemyGoals.Count <= 0)
+                return;
+            
+            EnemyGoals.Count -= 1;
+            
+            Debug.Log($"[LevelData] Enemy defeated! Remaining: {EnemyGoals.Count}, GemType: {EnemyGoals.GemType}");
+            
+            // Notify UI about enemy goal progress
+            // Use the GemType defined in EnemyGoals
+            OnGoalChanged?.Invoke(EnemyGoals.GemType, EnemyGoals.Count);
+            
+            if (EnemyGoals.Count == 0)
+            {
+                GoalLeft -= 1;
+                Debug.Log($"[LevelData] All enemies defeated! GoalLeft is now: {GoalLeft}");
+                
+                if (GoalLeft == 0)
+                {
+                    Debug.Log("[LevelData] ALL GOALS COMPLETED! Triggering victory!");
+                    GameManager.Instance.WinStar();
+                    GameManager.Instance.Board.ToggleInput(false);
+                    OnAllGoalFinished?.Invoke();
+                }
+                else
+                {
+                    Debug.Log($"[LevelData] Still have {GoalLeft} goals remaining. Victory not triggered yet.");
+                }
             }
         }
     }

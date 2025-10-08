@@ -1772,7 +1772,7 @@ TilemapRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
+  m_ChunkCullingBounds: {x: 0.1484375, y: 0.203125, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
@@ -1911,8 +1911,8 @@ Tilemap:
   - first: {x: -1, y: -5, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 8
-      m_TileSpriteIndex: 8
+      m_TileIndex: 1
+      m_TileSpriteIndex: 1
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2301,8 +2301,8 @@ Tilemap:
   - first: {x: 4, y: -1, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 9
-      m_TileSpriteIndex: 9
+      m_TileIndex: 2
+      m_TileSpriteIndex: 2
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -3152,10 +3152,10 @@ Tilemap:
   m_TileAssetArray:
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 11400000, guid: 7f44f72ab3fa04f3c93dbb66fb3fa5f4, type: 2}
+  - m_RefCount: 1
+    m_Data: {fileID: 11400000, guid: be0cc00a021c25546aa26309000e93eb, type: 2}
   - m_RefCount: 10
     m_Data: {fileID: 11400000, guid: e4a9eb57f62354a658e808f2dff66fd0, type: 2}
   - m_RefCount: 11
@@ -3166,17 +3166,17 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: d9ec7a548efa8bd45935c66a44b3a019, type: 2}
   - m_RefCount: 18
     m_Data: {fileID: 11400000, guid: 253e4b97e472d46e4ac748b9ec4cca4c, type: 2}
-  - m_RefCount: 24
+  - m_RefCount: 23
     m_Data: {fileID: 11400000, guid: 59e0ff696c102694e8f0163fd46fdae9, type: 2}
-  - m_RefCount: 33
+  - m_RefCount: 32
     m_Data: {fileID: 11400000, guid: 8cff2c1a6ce074e6282cd9cae236d37b, type: 2}
   m_TileSpriteArray:
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 1889135622834894632, guid: df897ccdea2c79e469ad43c91fbf013a, type: 3}
+  - m_RefCount: 1
+    m_Data: {fileID: 21300000, guid: 4833b68bd68daea49bdad1bdc7b87645, type: 3}
   - m_RefCount: 10
     m_Data: {fileID: 21300000, guid: 6ceb63930b431c74aa7b4d8d80bcb59c, type: 3}
   - m_RefCount: 11
@@ -3187,9 +3187,9 @@ Tilemap:
     m_Data: {fileID: 7482667652216324306, guid: ec714f6c2e8f5854c9a7c50c90352116, type: 3}
   - m_RefCount: 18
     m_Data: {fileID: 21300000, guid: ab0bbc4093276fc48935e33128b294ce, type: 3}
-  - m_RefCount: 24
+  - m_RefCount: 23
     m_Data: {fileID: 21300000, guid: 662d74de368854541a3bfb06081f7ed1, type: 3}
-  - m_RefCount: 33
+  - m_RefCount: 32
     m_Data: {fileID: 21300000, guid: e5b8e6f26730d484ea0b523e1d65f25e, type: 3}
   m_TileMatrixArray:
   - m_RefCount: 136
@@ -3386,15 +3386,12 @@ MonoBehaviour:
   LevelName: Level
   MaxMove: 20
   LowMoveTrigger: 3
-  Goals:
-  - Gem: {fileID: 7927807542344970777, guid: 04a81442ef4438841a0074ba8568d5d9, type: 3}
-    Count: 8
-  - Gem: {fileID: 3930743957587144661, guid: f3e47e37930ff8f48b693da87b4025c7, type: 3}
-    Count: 8
-  - Gem: {fileID: 7927807542344970777, guid: bb60bc505e820734584f3d8bd0a16f53, type: 3}
-    Count: 8
-  - Gem: {fileID: 7927807542344970777, guid: 3d45c7a5c1a18ce408b15ad7a814f987, type: 3}
-    Count: 8
+  Goals: []
+  EnemyGoals:
+    Count: 1
+    EnemyPrefab: {fileID: 0}
+    UISprite: {fileID: 1889135622834894632, guid: df897ccdea2c79e469ad43c91fbf013a, type: 3}
+    GemType: -1
   BorderMargin: 0.3
   Background: {fileID: 7645654448152055335}
   Music: {fileID: 8300000, guid: 800028ab827bd554284b052dc022f8bb, type: 3}

@@ -325,6 +325,9 @@ namespace Match3
             m_BonusModePrefab?.SetActive(false);
             UIHandler.Instance.UpdateBottomBar();
             UIHandler.Instance.DeselectBonusItem();
+            
+            // Clear the activated bonus state (important for board to become stable)
+            Board.ActivateBonusItem(null);
         }
 
         public AudioSource PlaySFX(AudioClip clip)

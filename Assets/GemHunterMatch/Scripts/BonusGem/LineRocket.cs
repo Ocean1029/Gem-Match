@@ -107,8 +107,12 @@ namespace Match3
                     }
                     else if (!content.ContainingGem.Damage(1))
                     {
-                        GameManager.Instance.Board.DestroyGem(m_CurrentCell, true);
-                        
+                        // Check if the gem still exists in the cell after Damage()
+                        // Some gems (like Enemy) clean themselves up in their Damage() method
+                        if (content.ContainingGem != null)
+                        {
+                            GameManager.Instance.Board.DestroyGem(m_CurrentCell, true);
+                        }
                     }
                 }
 

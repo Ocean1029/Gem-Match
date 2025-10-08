@@ -34,16 +34,27 @@ namespace Match3
 
             GameManager.Instance.PlaySFX(TriggerSound);
 
-            for (int x = -2; x <= 2; ++x)
+            for (int x = -1; x <= 1; ++x)
             {
-                for (int y = -2; y <= 2; ++y)
+                for (int y = -1; y <= 1; ++y)
                 {
                     var idx = m_CurrentIndex + new Vector3Int(x, y, 0);
-                    if (GameManager.Instance.Board.CellContent.TryGetValue(idx, out var content) &&
-                        content.ContainingGem != null)
+                    
+                    // Debug logging to track what's happening
+                    if (!GameManager.Instance.Board.CellContent.TryGetValue(idx, out var content))
                     {
-                        HandleContent(content, newMatch);
+                        Debug.Log($"Cell at offset ({x},{y}) doesn't exist in board");
+                        continue;
                     }
+                    
+                    if (content.ContainingGem == null)
+                    {
+                        Debug.Log($"Cell at offset ({x},{y}) has no gem");
+                        continue;
+                    }
+                    
+                    Debug.Log($"Processing gem at offset ({x},{y})");
+                    HandleContent(content, newMatch);
                 }
             }
         }

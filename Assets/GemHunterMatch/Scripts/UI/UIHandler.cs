@@ -331,8 +331,12 @@ namespace Match3
             
             //we clear the goal container as when we reload a level, there 
             m_GemGoalContent.Clear();
+            
+            // Add regular gem goals
             foreach (var goal in LevelData.Instance.Goals)
             {
+                Debug.Log($"[UIHandler] Adding Gem Goal: GemType={goal.Gem.GemType}, Count={goal.Count}, Name={goal.Gem.name}");
+                
                 var newInstance = GemGoalTemplate.Instantiate();
                 m_GemGoalContent.Add(newInstance);
 
@@ -349,9 +353,65 @@ namespace Match3
                 m_GoalCountLabelLookup[goal.Gem.GemType] = label;
                 m_Checkmarks[goal.Gem.GemType] = checkmark;
             }
+            
+            // Add enemy goal if it exists
+            if (LevelData.Instance.EnemyGoals != null && LevelData.Instance.EnemyGoals.Count > 0)
+            {
+                Debug.Log($"[UIHandler] Adding Enemy Goal: GemType={LevelData.Instance.EnemyGoals.GemType}, Count={LevelData.Instance.EnemyGoals.Count}, UISprite={LevelData.Instance.EnemyGoals.UISprite}");
+                
+                // Check if this GemType conflicts with any existing gem goals
+                if (m_GoalCountLabelLookup.ContainsKey(LevelData.Instance.EnemyGoals.GemType))
+                {
+                    Debug.LogError($"[UIHandler] Enemy GemType {LevelData.Instance.EnemyGoals.GemType} conflicts with an existing gem goal! This will cause UI display issues.");
+                }
+                
+                var newInstance = GemGoalTemplate.Instantiate();
+                m_GemGoalContent.Add(newInstance);
+
+                var label = newInstance.Q<Label>("GemGoalCount");
+                label.text = LevelData.Instance.EnemyGoals.Count.ToString();
+
+                var checkmark = newInstance.Q<VisualElement>("Checkmark");
+                checkmark.style.display = DisplayStyle.None;
+
+                var background = newInstance.Q<VisualElement>("GoalGemTemplate");
+                
+                // Try to get sprite from UISprite first, if null try to get from EnemyPrefab's SpriteRenderer
+                Sprite spriteToUse = LevelData.Instance.EnemyGoals.UISprite;
+                
+                if (spriteToUse == null && LevelData.Instance.EnemyGoals.EnemyPrefab != null)
+                {
+                    var spriteRenderer = LevelData.Instance.EnemyGoals.EnemyPrefab.GetComponent<SpriteRenderer>();
+                    if (spriteRenderer != null && spriteRenderer.sprite != null)
+                    {
+                        spriteToUse = spriteRenderer.sprite;
+                        Debug.Log($"[UIHandler] Using sprite from Enemy prefab's SpriteRenderer: {spriteToUse.name}");
+                    }
+                }
+                
+                if (spriteToUse != null)
+                {
+                    background.style.backgroundImage = new StyleBackground(spriteToUse);
+                }
+                else
+                {
+                    Debug.LogWarning("[UIHandler] No sprite found for Enemy Goal! Neither UISprite nor EnemyPrefab SpriteRenderer has a sprite.");
+                }
+
+                // Use the GemType defined in EnemyGoals
+                m_GoalCountLabelLookup[LevelData.Instance.EnemyGoals.GemType] = label;
+                m_Checkmarks[LevelData.Instance.EnemyGoals.GemType] = checkmark;
+            }
 
             LevelData.Instance.OnGoalChanged += (type, amount) =>
             {
+                // Check if this goal type exists in our lookup (it should always exist if properly initialized)
+                if (!m_GoalCountLabelLookup.ContainsKey(type))
+                {
+                    Debug.LogWarning($"Goal type {type} not found in UI lookup!");
+                    return;
+                }
+                
                 if (amount == 0)
                 {
                     m_GoalCountLabelLookup[type].style.display = DisplayStyle.None;
