@@ -24,11 +24,15 @@ namespace Match3
         public VisualEffect DamageEffect;
         public VisualEffect DeathEffect;
         public VisualEffect MoveEffect;
+        
+        [Header("Health Bar")]
+        public EnemyHealthBar HealthBarPrefab; // Optional: Health bar prefab to instantiate
 
         // Internal state
         private SpriteRenderer m_Renderer;
         private int m_MovesCounter = 0;       // Tracks player moves
         private bool m_HasMoved = false;      // Whether enemy has moved at least once
+        private EnemyHealthBar m_HealthBar;   // Reference to instantiated health bar
 
         private void Awake()
         {
@@ -51,6 +55,13 @@ namespace Match3
             
             UpdateVisualState();
             
+            // Create health bar if prefab is assigned
+            if (HealthBarPrefab != null)
+            {
+                m_HealthBar = Instantiate(HealthBarPrefab, transform);
+                m_HealthBar.Initialize(transform, MaxHealth);
+            }
+            
             // Register to board's enemy tracking system
             Board.RegisterEnemy(this);
         }
@@ -67,6 +78,12 @@ namespace Match3
             
             var stillAlive = base.Damage(damage);
             UpdateVisualState();
+            
+            // Update health bar
+            if (m_HealthBar != null)
+            {
+                m_HealthBar.UpdateHealth(m_HitPoints);
+            }
             
             if (!stillAlive)
             {
@@ -229,6 +246,12 @@ namespace Match3
             
             if (DeathEffect != null)
                 GameManager.Instance.PoolSystem.PlayInstanceAt(DeathEffect, transform.position);
+            
+            // Hide health bar
+            if (m_HealthBar != null)
+            {
+                m_HealthBar.Hide();
+            }
             
             // Clear the cell reference before destruction
             var board = GameManager.Instance.Board;

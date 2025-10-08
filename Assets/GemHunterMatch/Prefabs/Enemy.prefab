@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.81789, y: 0.69911, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -58,6 +58,7 @@ MonoBehaviour:
   DamageEffect: {fileID: 0}
   DeathEffect: {fileID: 0}
   MoveEffect: {fileID: 0}
+  HealthBarPrefab: {fileID: 255325453508710334, guid: b746e29ee62a54530877d7ad89157ae9, type: 3}
 --- !u!212 &3053743377823454306
 SpriteRenderer:
   m_ObjectHideFlags: 0

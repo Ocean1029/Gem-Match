@@ -27,11 +27,41 @@
 ## Unity Editor 快速設定流程
 
 ### A. 程式部分的修改（已完成）
-✅ 所有程式碼已經寫好，無需額外修改
+✅ 所有程式碼已經寫好，包含敵人系統和血條系統，無需額外修改
+
+**新增檔案**：
+- Enemy.cs - 敵人核心類別
+- EnemyPlacer.cs - Tilemap 編輯工具
+- EnemyHealthBar.cs - 血條 UI 組件
+
+**修改檔案**：
+- Board.cs - 敵人追蹤、回合通知、空格子標記
+- LevelData.cs - 敵人目標系統
+- UIHandler.cs - 敵人目標 UI 顯示
+- GameManager.cs - Bonus item 使用後的清理
+- BonusGem.cs - 處理敵人死亡的安全檢查
+- LineRocket.cs - 處理敵人死亡的安全檢查
 
 ### B. Unity Editor 上面的修改
 
-#### 1. 創建敵人 Prefab
+#### 1. 創建血條 Prefab（可選但建議）
+- [ ] Hierarchy → UI → Canvas，命名為 "EnemyHealthBarCanvas"
+- [ ] **刪除自動創建的 EventSystem**（場景中已經有了）
+- [ ] 設定 Canvas：Render Mode = World Space
+- [ ] 添加 UI → Slider，命名為 "HealthSlider"
+- [ ] 設定 Slider：Min=0, Max=1, Value=1, Interactable=取消勾選
+- [ ] 刪除 "Handle Slide Area"
+- [ ] 設定 Fill 顏色（綠色）和 Background 顏色（深灰）
+- [ ] Add Component → Enemy Health Bar (Script)
+- [ ] 設定 EnemyHealthBar：
+  - Canvas: 拖曳 Canvas component
+  - Health Slider: 拖曳 HealthSlider
+  - Fill Image: 拖曳 Fill Area → Fill 的 Image
+  - Offset: (0, 0.6, 0)
+  - Health Color Gradient: 設定綠→黃→紅漸變
+- [ ] 儲存為 Prefab "EnemyHealthBar"
+
+#### 2. 創建敵人 Prefab
 - [ ] Hierarchy → Create Empty → 命名為 "Enemy"
 - [ ] Add Component → Enemy (Script)
 - [ ] Add Component → Sprite Renderer
@@ -40,21 +70,22 @@
   - Moves Before First Move: 3
   - Move Interval: 2
   - Health States: 設定不同生命值的 sprites
-  - Gem Type: 100（或其他不重複的 ID）
+  - Gem Type: -1（與 LevelData → Enemy Goals 一致）
+  - **Health Bar Prefab: 拖曳 EnemyHealthBar prefab**
 - [ ] 儲存為 Prefab 到 `Assets/GemHunterMatch/Prefabs/`
 
-#### 2. 創建 EnemyPlacer Tile
+#### 3. 創建 EnemyPlacer Tile
 - [ ] Project → `Assets/GemHunterMatch/Tiles/`
 - [ ] 右鍵 → Create → 2D Match → Tile → Enemy Placer
 - [ ] 設定：
   - Preview Editor Sprite: 選擇預覽用 sprite
   - Enemy Prefab: 拖曳剛才的 Enemy prefab
 
-#### 3. 加入 Tile Palette
+#### 4. 加入 Tile Palette
 - [ ] Window → 2D → Tile Palette
 - [ ] 將 EnemyPlacer tile 拖曳到 Logic Palette
 
-#### 4. 修改 Level 4
+#### 5. 修改 Level 4
 - [ ] 開啟 Level 4 場景
 - [ ] 選擇 LevelData GameObject
 - [ ] 設定 Enemy Goals：
@@ -66,7 +97,7 @@
 - [ ] 使用 Tile Palette 在 Logic Tilemap 上繪製 5 個敵人
 - [ ] 儲存場景
 
-#### 5. 測試
+#### 6. 測試
 - [ ] 進入 Play Mode
 - [ ] 確認敵人正確顯示
 - [ ] 確認敵人會在設定回合後移動
