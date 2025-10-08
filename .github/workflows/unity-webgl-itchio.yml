@@ -7,48 +7,48 @@ on:
 
 jobs:
   
-  expand-space:
-    runs-on: ubuntu-latest
-    steps:
+  # expand-space:
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-    - name: Free Disk Space (Ubuntu)
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
-    - name: Expand Docker space dynamically
-      shell: bash
-      run: |
-        echo "=== Detecting system memory ==="
-        TOTAL_MEM_GB=$(free -g | awk '/^Mem:/{print $2}')
-        echo "Detected ${TOTAL_MEM_GB} GB of RAM."
+  #   - name: Free Disk Space (Ubuntu)
+  #     uses: jlumbroso/free-disk-space@main
+  #     with:
+  #       tool-cache: false
+  #       android: true
+  #       dotnet: true
+  #       haskell: true
+  #       large-packages: true
+  #       docker-images: true
+  #       swap-storage: true
+  #   - name: Expand Docker space dynamically
+  #     shell: bash
+  #     run: |
+  #       echo "=== Detecting system memory ==="
+  #       TOTAL_MEM_GB=$(free -g | awk '/^Mem:/{print $2}')
+  #       echo "Detected ${TOTAL_MEM_GB} GB of RAM."
     
-        if [ "$TOTAL_MEM_GB" -ge 14 ]; then
-          TMPFS_SIZE="30G"
-        elif [ "$TOTAL_MEM_GB" -ge 7 ]; then
-          TMPFS_SIZE="25G"
-        else
-          TMPFS_SIZE="15G"
-        fi
+  #       if [ "$TOTAL_MEM_GB" -ge 14 ]; then
+  #         TMPFS_SIZE="30G"
+  #       elif [ "$TOTAL_MEM_GB" -ge 7 ]; then
+  #         TMPFS_SIZE="25G"
+  #       else
+  #         TMPFS_SIZE="15G"
+  #       fi
     
-        echo "Using tmpfs size: $TMPFS_SIZE"
+  #       echo "Using tmpfs size: $TMPFS_SIZE"
     
-        echo "=== Expanding Docker space ==="
-        sudo service docker stop
-        sudo rm -rf /var/lib/docker
-        sudo mkdir -p /mnt/docker
-        sudo mount -t tmpfs -o size=$TMPFS_SIZE tmpfs /mnt/docker
-        sudo ln -s /mnt/docker /var/lib/docker
-        sudo service docker start
+  #       echo "=== Expanding Docker space ==="
+  #       sudo service docker stop
+  #       sudo rm -rf /var/lib/docker
+  #       sudo mkdir -p /mnt/docker
+  #       sudo mount -t tmpfs -o size=$TMPFS_SIZE tmpfs /mnt/docker
+  #       sudo ln -s /mnt/docker /var/lib/docker
+  #       sudo service docker start
     
-        echo "=== Checking space usage ==="
-        df -h
-        docker system df || true
+  #       echo "=== Checking space usage ==="
+  #       df -h
+  #       docker system df || true
   
   Run-Unity-Tests:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
   build:
     name: Build WebGL ✨
     runs-on: ubuntu-latest
-    needs: expand-space
+    # needs: expand-space
     steps:
       # Checkout
       - name: Checkout repository
@@ -89,21 +89,21 @@ jobs:
         with:
           lfs: true
 
-      # - name: Expand Docker storage to /mnt/docker
-      #   shell: bash
-      #   run: |
-      #     echo "=== Expanding Docker space using /mnt/docker ==="
-      #     sudo systemctl stop docker.socket || true
-      #     sudo systemctl stop docker || true
-      #     sudo rm -rf /var/lib/docker
-      #     sudo mkdir -p /mnt/docker
-      #     echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-      #     sudo systemctl daemon-reload
-      #     sudo systemctl start docker
-      #     echo "Docker root dir:"
-      #     docker info | grep "Docker Root Dir"
-      #     echo "Current disk usage:"
-      #     df -h
+      - name: Expand Docker storage to /mnt/docker
+        shell: bash
+        run: |
+          echo "=== Expanding Docker space using /mnt/docker ==="
+          sudo systemctl stop docker.socket || true
+          sudo systemctl stop docker || true
+          sudo rm -rf /var/lib/docker
+          sudo mkdir -p /mnt/docker
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl daemon-reload
+          sudo systemctl start docker
+          echo "Docker root dir:"
+          docker info | grep "Docker Root Dir"
+          echo "Current disk usage:"
+          df -h
       # Cache Unity Library
       - name: Cache Library
         uses: actions/cache@v3
